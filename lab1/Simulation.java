@@ -33,11 +33,11 @@ public class Simulation {
     }
 
     public boolean arrival(long tick) {
-        if (tick == nextTick) {
+        if (tick >= nextTick) {
             queue.add(new Packet(tick));
 
             double randomVariable = ExponentialDistribution.randomVariable(this.packetsPerSecond);
-            this.nextTick += (long)(randomVariable * 1000000.0);
+            this.nextTick = tick + (long)(randomVariable * 1000000.0);
 
             return true;
         }
@@ -72,6 +72,7 @@ public class Simulation {
     }
 
     public void computePerformance() {
+        System.out.println("Lambda: " + this.packetsPerSecond);
         System.out.println("Average queue size: " + this.averageQueueSize());
         System.out.println("Average sojourn time: " + this.averageSojournTime());
         System.out.println("Percent idle: " + this.percentIdle());

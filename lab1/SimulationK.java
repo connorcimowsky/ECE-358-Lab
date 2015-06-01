@@ -6,7 +6,7 @@ public class SimulationK {
     private final LinkedList<Packet> queue = new LinkedList<Packet>();
     private final long packetsPerSecond;
     private final long serviceTime;
-    private final int bufferSize = 0;
+    private final int bufferSize;
 
     private long totalTicks = 0;
     private long nextTick = 0;
@@ -15,8 +15,6 @@ public class SimulationK {
     private long dropCounter = 0;
 
     public SimulationK(long packetsPerSecond, double packetLength, double transmissionRate, int bufferSize) {
-        System.out.println("K,Lambda,AvgQueueSize,AvgSojourn,NumPackets,NumDropped,Pidle");
-
         this.packetsPerSecond = packetsPerSecond;
         this.serviceTime = (long)((packetLength / transmissionRate) * 1000000.0);
         this.bufferSize = bufferSize;
@@ -83,7 +81,10 @@ public class SimulationK {
     }
 
     public void computePerformance() {
-        System.out.println(this.bufferSize + "," + this.packetsPerSecond + "," + this.averageQueueSize() + "," + this.averageSojournTime() + "," + this.packetCounter + "," + this.dropCounter + "," + this.percentIdle());
+        System.out.println("E[N]:\t" + this.averageQueueSize());
+        System.out.println("E[T]:\t" + this.averageSojournTime() + " µs");
+        System.out.println("P_IDLE:\t" + this.percentIdle() + "%");
+        System.out.println("P_LOSS:\t" + this.percentLoss() + "%");
     }
 
     private double averageQueueSize() {
@@ -107,6 +108,10 @@ public class SimulationK {
     }
 
     private double percentIdle() {
-        return ((double)this.idleTime / (double)this.totalTicks);
+        return ((double)this.idleTime / (double)this.totalTicks) * 100.0;
+    }
+
+    private double percentLoss() {
+        return ((double)this.dropCounter / (double)this.packetCounter) * 100.0;
     }
 }

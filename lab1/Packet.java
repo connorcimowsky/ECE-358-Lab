@@ -1,5 +1,5 @@
 public class Packet {
-    private final long arrivalTick = 0;
+    private final long arrivalTick;
     private boolean servicing = false;
     private long departureTick = 0;
 

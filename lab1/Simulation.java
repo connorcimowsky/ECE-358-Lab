@@ -12,8 +12,6 @@ public class Simulation {
     private long idleTime = 0;
 
     public Simulation(long packetsPerSecond, double packetLength, double transmissionRate) {
-        System.out.println("Lambda,AvgQueueSize,AvgSojourn,Pidle,IdleTime,Ticks");
-
         this.packetsPerSecond = packetsPerSecond;
         this.serviceTime = (long)((packetLength / transmissionRate) * 1000000.0);
     }
@@ -72,7 +70,9 @@ public class Simulation {
     }
 
     public void computePerformance() {
-        System.out.println(this.packetsPerSecond + "," + this.averageQueueSize() + "," + this.averageSojournTime() + "," + this.percentIdle() + "," + this.idleTime + "," + this.totalTicks);
+        System.out.println("E[N]:\t" + this.averageQueueSize());
+        System.out.println("E[T]:\t" + this.averageSojournTime() + " µs");
+        System.out.println("P_IDLE:\t" + this.percentIdle() + "%");
     }
 
     private double averageQueueSize() {
@@ -96,6 +96,6 @@ public class Simulation {
     }
 
     private double percentIdle() {
-        return ((double)this.idleTime / (double)this.totalTicks);
+        return ((double)this.idleTime / (double)this.totalTicks) * 100.0;
     }
 }

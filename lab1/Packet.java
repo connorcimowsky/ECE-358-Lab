@@ -1,7 +1,7 @@
 public class Packet {
-    private final long arrivalTick;
+    private final long arrivalTick = 0;
     private boolean servicing = false;
-    private long departureTick;
+    private long departureTick = 0;
 
     public Packet(long arrivalTick) {
         this.arrivalTick = arrivalTick;

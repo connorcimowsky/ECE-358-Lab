@@ -3,15 +3,17 @@ import java.util.*;
 public class Simulation {
     private final LinkedList<Long> sojournTimes = new LinkedList<Long>();
     private final LinkedList<Integer> queueSizes = new LinkedList<Integer>();
-    private long idleTime = 0;
-
     private final LinkedList<Packet> queue = new LinkedList<Packet>();
-    private long totalTicks;
     private final long packetsPerSecond;
     private final long serviceTime;
+
+    private long totalTicks = 0;
     private long nextTick = 0;
+    private long idleTime = 0;
 
     public Simulation(long packetsPerSecond, double packetLength, double transmissionRate) {
+        System.out.println("Lambda,AvgQueueSize,AvgSojourn,Pidle,IdleTime,Ticks");
+
         this.packetsPerSecond = packetsPerSecond;
         this.serviceTime = (long)((packetLength / transmissionRate) * 1000000.0);
     }
@@ -28,8 +30,6 @@ public class Simulation {
                 queueSizes.add(this.queue.size());
             }
         }
-
-        System.out.println("done");
     }
 
     public boolean arrival(long tick) {
@@ -72,13 +72,7 @@ public class Simulation {
     }
 
     public void computePerformance() {
-        System.out.println("Lambda: " + this.packetsPerSecond);
-        System.out.println("Average queue size: " + this.averageQueueSize());
-        System.out.println("Average sojourn time: " + this.averageSojournTime());
-        System.out.println("Percent idle: " + this.percentIdle());
-        System.out.println("Idle time: " + this.idleTime);
-        System.out.println("Ticks: " + this.totalTicks);
-        System.out.println("");
+        System.out.println(this.packetsPerSecond + "," + this.averageQueueSize() + "," + this.averageSojournTime() + "," + this.percentIdle() + "," + this.idleTime + "," + this.totalTicks);
     }
 
     private double averageQueueSize() {

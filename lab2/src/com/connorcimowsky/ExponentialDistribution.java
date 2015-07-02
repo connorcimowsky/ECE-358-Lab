@@ -1,8 +1,8 @@
 package com.connorcimowsky;
 
-/**
- * Created by Connor on 7/2/15.
- */
 public class ExponentialDistribution {
-
+    public static double randomVariable(double lambda) {
+        double uniformRandomVariable = Math.random();
+        return Math.log(1 - uniformRandomVariable) / (-lambda);
+    }
 }

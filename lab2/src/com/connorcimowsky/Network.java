@@ -8,6 +8,7 @@ public class Network {
     }
 
     private int busyCounter = 0;
+    private int dirtyCounter = 0;
 
     public State getNetworkState() {
         switch (busyCounter) {
@@ -20,11 +21,16 @@ public class Network {
         }
     }
 
-    public void incrementBusyCounter() {
-        busyCounter += 1;
+    public void addTraffic() {
+        dirtyCounter += 1;
     }
 
-    public void decrementBusyCounter() {
-        busyCounter -= 1;
+    public void removeTraffic() {
+        dirtyCounter -= 1;
+    }
+
+    public void flush() {
+        busyCounter = dirtyCounter;
+        dirtyCounter = 0;
     }
 }

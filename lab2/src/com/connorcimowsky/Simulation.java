@@ -6,8 +6,8 @@ import java.util.List;
 public class Simulation {
     private List<Node> nodes;
     private Network network;
-    private double networkSpeed;
     private int packetLength;
+    private long ticks;
 
     public Simulation() {
         nodes = null;
@@ -15,13 +15,12 @@ public class Simulation {
     }
 
     public void startSimulation(long ticks, int N, long lambda, long networkSpeed, int packetLength) {
-        this.networkSpeed = networkSpeed;
         this.packetLength = packetLength * 8;
-
+        this.ticks = ticks;
         this.nodes = new ArrayList<Node>(N);
 
         for (int i = 0; i < N; i++) {
-            this.nodes.add(new Node(Simulation.propagationDelay(i), this.network, lambda, packetLength));
+            this.nodes.add(new Node(Simulation.propagationDelay(i), this.network, lambda, this.packetLength));
         }
 
         for (long t = 0; t < ticks; t++) {
@@ -34,6 +33,16 @@ public class Simulation {
     }
 
     public void computePerformance() {
+        double totalSent = 0.0;
+        for (Node n : nodes) {
+            totalSent += n.getCompletedRequests();
+        }
+
+        double throughput = totalSent / (double)ticks;
+
+        System.out.println("Total sent: " + totalSent);
+        System.out.println("Total ticks: " + ticks);
+        System.out.println("Throughput: " + throughput);
     }
 
     public static long propagationDelay(int index) {

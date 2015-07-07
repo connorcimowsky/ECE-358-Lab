@@ -30,7 +30,7 @@ public class Network {
     }
 
     public void flush() {
-        busyCounter = dirtyCounter;
+        busyCounter += dirtyCounter;
         dirtyCounter = 0;
     }
 }

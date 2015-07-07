@@ -68,7 +68,7 @@ public class Node {
     }
 
     private void sensing() {
-        if (network.getNetworkState() != Network.State.IDLE) {
+        if (!network.getNetworkState().equals(Network.State.IDLE)) {
             this.resetSenseTime();
 
             return;

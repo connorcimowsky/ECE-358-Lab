@@ -96,6 +96,7 @@ public class Node {
             this.network.removeTraffic();
             this.time = ExponentialDistribution.randomVariable(this.lambda);
             this.completedRequests += 1;
+            this.backoffCounter = 0;
         }
     }
 

@@ -118,6 +118,7 @@ public class Node {
     private void backoff() {
         if (time == 0) {
             this.currentState = State.SENSING;
+            resetSenseTime();
         }
     }
 

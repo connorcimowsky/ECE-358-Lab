@@ -33,12 +33,12 @@ public class Simulation {
     }
 
     public void computePerformance() {
-        double totalSent = 0.0;
+        int totalSent = 0;
         for (Node n : nodes) {
             totalSent += n.getCompletedRequests();
         }
 
-        double throughput = totalSent / (double)ticks;
+        double throughput = (double)totalSent / (double)ticks;
 
         System.out.println("Total sent: " + totalSent);
         System.out.println("Total ticks: " + ticks);

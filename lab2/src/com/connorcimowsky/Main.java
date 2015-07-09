@@ -9,9 +9,41 @@ public class Main {
     private static final int PACKET_LENGTH = 1500;
 
     public static void main(String[] args) {
-        Simulation simulation = new Simulation();
-        simulation.startSimulation(NUM_TICKS, 20, 7, 1, 1500);
-        simulation.computePerformance();
+        final Scanner scanner = new Scanner(System.in);
+
+        System.out.print("1-persistent? [y/n] ");
+
+        boolean onePersistent = (scanner.nextLine().equals("y"));
+
+        System.out.println("");
+
+        long W = 0;
+        int L = 0;
+        int N = 0;
+        long A = 0;
+
+        System.out.println("Enter a value for N: ");
+        N = scanner.nextInt();
+
+        System.out.println("Enter a value for A: ");
+        A = scanner.nextLong();
+
+        System.out.println("Enter a value for W: ");
+        W = scanner.nextLong();
+
+        System.out.println("Enter a value for L: ");
+        L = scanner.nextInt();
+
+        System.out.println("");
+        System.out.println("Starting simulation...");
+        System.out.println("");
+
+        if (onePersistent) {
+            Simulation simulation = new Simulation();
+            simulation.startSimulation(NUM_TICKS, N, A, W, L);
+            simulation.computePerformance();
+        }
+
     }
 
     private static void questionOneAndThree(Simulation s) {

@@ -9,12 +9,18 @@ public class Node {
         BACKOFF
     }
 
+    private static final int JAMMING_TIME = 48;
+    private static final int SENSING_TIME = 96;
+
     private long propagationDelay;
     private long time;
     private State currentState;
     private Network network;
     private long lambda;
     private int packetLength;
+    private int backoffCounter;
+    private int completedRequests;
+    private int delayTime;
 
     public Node(long propagationDelay, Network network, long lambda, int packetLength) {
         this.propagationDelay = propagationDelay;
@@ -23,10 +29,17 @@ public class Node {
         this.network = network;
         this.lambda = lambda;
         this.packetLength = packetLength;
+        this.backoffCounter = 0;
+        this.completedRequests = 0;
+        this.delayTime = 0;
     }
 
     public void update() {
         this.time -= 1;
+
+        if (currentState != State.IDLE) {
+            delayTime += 1;
+        }
 
         switch(currentState) {
             case IDLE:
@@ -47,6 +60,14 @@ public class Node {
         }
     }
 
+    public int getCompletedRequests() {
+        return this.completedRequests;
+    }
+
+    public int getDelayTime() {
+        return this.delayTime;
+    }
+
     private void idle() {
         if (this.time != 0) {
             return;
@@ -57,8 +78,9 @@ public class Node {
     }
 
     private void sensing() {
-        if (network.getNetworkState() != Network.State.IDLE) {
+        if (!network.getNetworkState().equals(Network.State.IDLE)) {
             this.resetSenseTime();
+
             return;
         }
 
@@ -74,29 +96,43 @@ public class Node {
     private void transmitting() {
         if (this.network.getNetworkState() == Network.State.COLLISION) {
             this.currentState = State.JAMMING;
-            this.time = 48;
+            this.time = JAMMING_TIME;
 
             return;
         }
 
         if (time == 0) {
             this.currentState = State.IDLE;
+            this.network.removeTraffic();
             this.time = ExponentialDistribution.randomVariable(this.lambda);
+            this.completedRequests += 1;
+            this.backoffCounter = 0;
         }
     }
 
     private void jamming() {
-        if (this.time == 0) {
-            this.currentState = State.BACKOFF;
-//            this.time =
+        if (this.time > 0) {
+            return;
         }
+
+        this.currentState = State.BACKOFF;
+        this.network.removeTraffic();
+
+        if (this.backoffCounter < 10) {
+            this.backoffCounter += 1;
+        }
+
+        this.time = ExponentialDistribution.backoffRandom(this.backoffCounter);
     }
 
     private void backoff() {
-
+        if (time == 0) {
+            this.currentState = State.SENSING;
+            resetSenseTime();
+        }
     }
 
     private void resetSenseTime() {
-        this.time = 96;
+        this.time = SENSING_TIME;
     }
 }

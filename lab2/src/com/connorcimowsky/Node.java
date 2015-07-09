@@ -20,6 +20,7 @@ public class Node {
     private int packetLength;
     private int backoffCounter;
     private int completedRequests;
+    private int delayTime;
 
     public Node(long propagationDelay, Network network, long lambda, int packetLength) {
         this.propagationDelay = propagationDelay;
@@ -30,10 +31,15 @@ public class Node {
         this.packetLength = packetLength;
         this.backoffCounter = 0;
         this.completedRequests = 0;
+        this.delayTime = 0;
     }
 
     public void update() {
         this.time -= 1;
+
+        if (currentState != State.IDLE) {
+            delayTime += 1;
+        }
 
         switch(currentState) {
             case IDLE:
@@ -56,6 +62,10 @@ public class Node {
 
     public int getCompletedRequests() {
         return this.completedRequests;
+    }
+
+    public int getDelayTime() {
+        return this.delayTime;
     }
 
     private void idle() {

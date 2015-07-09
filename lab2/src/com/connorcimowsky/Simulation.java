@@ -34,15 +34,19 @@ public class Simulation {
 
     public void computePerformance() {
         int totalSent = 0;
+        long delayTime = 0;
         for (Node n : nodes) {
             totalSent += n.getCompletedRequests();
+            delayTime += n.getDelayTime();
         }
 
         double throughput = (double)totalSent / (double)ticks;
+        double averageDelay = (double)delayTime / (double)totalSent;
 
         System.out.println("Total sent: " + totalSent);
         System.out.println("Total ticks: " + ticks);
         System.out.println("Throughput: " + throughput);
+        System.out.println("Average Delay: " + averageDelay);
     }
 
     public static long propagationDelay(int index) {

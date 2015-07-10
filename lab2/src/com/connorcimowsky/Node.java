@@ -4,6 +4,8 @@ public class Node {
     private enum State {
         IDLE,
         SENSING,
+        SLOTWAIT,
+        RANDOMWAIT,
         TRANSMITTING,
         JAMMING,
         BACKOFF
@@ -18,17 +20,19 @@ public class Node {
     private Network network;
     private long lambda;
     private int packetLength;
+    private double probability;
     private int backoffCounter;
     private int completedRequests;
     private int delayTime;
 
-    public Node(long propagationDelay, Network network, long lambda, int packetLength) {
+    public Node(long propagationDelay, Network network, long lambda, int packetLength, double probability) {
         this.propagationDelay = propagationDelay;
         this.time = ExponentialDistribution.randomVariable(lambda);
         this.currentState = State.IDLE;
         this.network = network;
         this.lambda = lambda;
         this.packetLength = packetLength;
+        this.probability = probability;
         this.backoffCounter = 0;
         this.completedRequests = 0;
         this.delayTime = 0;
@@ -47,6 +51,12 @@ public class Node {
                 break;
             case SENSING:
                 this.sensing();
+                break;
+            case SLOTWAIT:
+                this.slotwait();
+                break;
+            case RANDOMWAIT:
+                this.randomwait();
                 break;
             case TRANSMITTING:
                 this.transmitting();
@@ -79,7 +89,14 @@ public class Node {
 
     private void sensing() {
         if (!network.getNetworkState().equals(Network.State.IDLE)) {
-            this.resetSenseTime();
+            // TODO better check or flag to indicate non-persistent
+            if (probability == 100.0) {
+                this.resetSenseTime();
+            } else {
+                this.currentState = State.RANDOMWAIT;
+                // TODO binary exponential backoff, is this time correct?
+                this.time = ExponentialDistribution.backoffRandom(this.backoffCounter);
+            }
 
             return;
         }
@@ -88,9 +105,43 @@ public class Node {
             return;
         }
 
-        this.currentState = State.TRANSMITTING;
-        this.network.addTraffic();
-        this.time = this.propagationDelay + this.packetLength;
+        if (Math.random() <= this.probability) {
+            this.currentState = State.TRANSMITTING;
+            this.network.addTraffic();
+            this.time = this.propagationDelay + this.packetLength;
+        } else {
+            this.currentState = State.SLOTWAIT;
+            // TODO Figure out how long to wait
+            this.time = SENSING_TIME;
+        }
+
+    }
+
+    private void randomwait() {
+        if (this.time > 0) {
+            return;
+        }
+
+        this.currentState = State.SENSING;
+        // TODO Add this time?
+        resetSenseTime();
+    }
+
+    private void slotwait() {
+        if (this.time > 0) {
+            return;
+        }
+
+        // TODO confirm we only want to check once and not poll
+        if (!network.getNetworkState().equals(Network.State.IDLE)) {
+            // TODO new/old/incr backoff counter? does it go back to sensing?
+            // assume i doesnt reset and we go straight to backoff state -> sensing
+            this.currentState = State.BACKOFF;
+            this.time = ExponentialDistribution.backoffRandom(this.backoffCounter);
+        } else {
+            // TODO assume it does it on the same tick?
+            this.sensing();
+        }
     }
 
     private void transmitting() {

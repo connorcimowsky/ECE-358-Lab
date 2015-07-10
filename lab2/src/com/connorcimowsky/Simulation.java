@@ -7,6 +7,7 @@ public class Simulation {
     private List<Node> nodes;
     private Network network;
     private int packetLength;
+    private double probability;
     private long ticks;
 
     public Simulation() {
@@ -14,13 +15,14 @@ public class Simulation {
         network = new Network();
     }
 
-    public void startSimulation(long ticks, int N, long lambda, long networkSpeed, int packetLength) {
+    public void startSimulation(long ticks, int N, long lambda, long networkSpeed, int packetLength, double probability) {
         this.packetLength = packetLength * 8;
+        this.probability = probability;
         this.ticks = ticks;
         this.nodes = new ArrayList<Node>(N);
 
         for (int i = 0; i < N; i++) {
-            this.nodes.add(new Node(Simulation.propagationDelay(i), this.network, lambda, this.packetLength));
+            this.nodes.add(new Node(Simulation.propagationDelay(i), this.network, lambda, this.packetLength, this.probability));
         }
 
         for (long t = 0; t < ticks; t++) {

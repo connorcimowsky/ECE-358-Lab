@@ -17,10 +17,18 @@ public class Main {
 
         System.out.println("");
 
+        double p = 100.0;    // 100.0 is the temporary check for non-persistent
         long W = 0;
         int L = 0;
         int N = 0;
         long A = 0;
+
+        if (!onePersistent) {
+            while (p < 0 || p > 1) {
+                System.out.println("Enter a value for p: ");
+                p = scanner.nextDouble();
+            }
+        }
 
         System.out.println("Enter a value for N: ");
         N = scanner.nextInt();
@@ -38,14 +46,11 @@ public class Main {
         System.out.println("Starting simulation...");
         System.out.println("");
 
-        if (onePersistent) {
-            Simulation simulation = new Simulation();
-            simulation.startSimulation(NUM_TICKS, N, A, W, L);
-            simulation.computePerformance();
-        }
-
+        Simulation simulation = new Simulation();
+        simulation.startSimulation(NUM_TICKS, N, A, W, L, p);
+        simulation.computePerformance();
     }
-
+/*
     private static void questionOneAndThree(Simulation s) {
         for (int A = 5; A <= 7; A++) {
             System.out.println("Running for A = " + A);
@@ -53,7 +58,7 @@ public class Main {
             for (int n = 20; n <= 100; n+= 20) {
                 System.out.println("Running for n = " + n);
                 System.out.println();
-                s.startSimulation(NUM_TICKS, n, A, NETWORK_SPEED, PACKET_LENGTH);
+                s.startSimulation(NUM_TICKS, n, A, NETWORK_SPEED, PACKET_LENGTH, 1);
                 s.computePerformance();
             }
         }
@@ -66,9 +71,10 @@ public class Main {
             for (int A = 4; A <= 20; A += 4) {
                 System.out.println("Running for A = " + A);
                 System.out.println();
-                s.startSimulation(NUM_TICKS, n, A, NETWORK_SPEED, PACKET_LENGTH);
+                s.startSimulation(NUM_TICKS, n, A, NETWORK_SPEED, PACKET_LENGTH, 1);
                 s.computePerformance();
             }
         }
     }
 }
+*/

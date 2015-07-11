@@ -8,19 +8,21 @@ public class Simulation {
     private Network network;
     private int packetLength;
     private long ticks;
+    private double P;
 
     public Simulation() {
         nodes = null;
         network = new Network();
     }
 
-    public void startSimulation(long ticks, int N, long lambda, long networkSpeed, int packetLength) {
+    public void startSimulation(long ticks, int N, long lambda, long networkSpeed, int packetLength, double P) {
         this.packetLength = packetLength * 8;
         this.ticks = ticks;
         this.nodes = new ArrayList<Node>(N);
+        this.P = P;
 
         for (int i = 0; i < N; i++) {
-            this.nodes.add(new Node(Simulation.propagationDelay(i), this.network, lambda, this.packetLength));
+            this.nodes.add(new Node(Simulation.propagationDelay(i), this.network, lambda, this.packetLength, P));
         }
 
         for (long t = 0; t < ticks; t++) {

@@ -21,8 +21,9 @@ public class Node {
     private int backoffCounter;
     private int completedRequests;
     private int delayTime;
+    private double P;
 
-    public Node(long propagationDelay, Network network, long lambda, int packetLength) {
+    public Node(long propagationDelay, Network network, long lambda, int packetLength, double P) {
         this.propagationDelay = propagationDelay;
         this.time = ExponentialDistribution.randomVariable(lambda);
         this.currentState = State.IDLE;
@@ -32,6 +33,7 @@ public class Node {
         this.backoffCounter = 0;
         this.completedRequests = 0;
         this.delayTime = 0;
+        this.P = P;
     }
 
     public void update() {
@@ -134,5 +136,9 @@ public class Node {
 
     private void resetSenseTime() {
         this.time = SENSING_TIME;
+
+        if (this.P == 0.0) {
+            this.time += ExponentialDistribution.backoffRandom(this.backoffCounter);
+        }
     }
 }

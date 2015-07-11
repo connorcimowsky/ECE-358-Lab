@@ -3,8 +3,8 @@ package com.connorcimowsky;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Simulation implements SimulationInterface {
-    private List<Node> nodes;
+public class SimulationPPersistent implements SimulationInterface {
+    private List<NodePPersistent> nodes;
     private Network network;
     private int packetLength;
     private long ticks;
@@ -13,7 +13,7 @@ public class Simulation implements SimulationInterface {
     private long lambda;
     private long networkSpeed;
 
-    public Simulation() {
+    public SimulationPPersistent() {
         nodes = null;
         network = new Network();
     }
@@ -23,17 +23,17 @@ public class Simulation implements SimulationInterface {
         this.N = N;
         this.lambda = lambda;
         this.networkSpeed = networkSpeed;
-        this.nodes = new ArrayList<Node>(N);
+        this.nodes = new ArrayList<NodePPersistent>(N);
         this.packetLength = packetLength * 8;
         this.ticks = ticks;
         this.P = P;
 
         for (int i = 0; i < N; i++) {
-            this.nodes.add(new Node(Simulation.propagationDelay(i), this.network, lambda, this.packetLength, P));
+            this.nodes.add(new NodePPersistent(Simulation.propagationDelay(i), this.network, lambda, this.packetLength, P));
         }
 
         for (long t = 0; t < ticks; t++) {
-            for (Node node : this.nodes) {
+            for (NodePPersistent node : this.nodes) {
                 node.update();
             }
 
@@ -45,7 +45,7 @@ public class Simulation implements SimulationInterface {
     public void computePerformance() {
         int totalSent = 0;
         long delayTime = 0;
-        for (Node n : nodes) {
+        for (NodePPersistent n : nodes) {
             totalSent += n.getCompletedRequests();
             delayTime += n.getDelayTime();
         }

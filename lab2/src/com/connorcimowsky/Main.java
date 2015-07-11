@@ -35,10 +35,22 @@ public class Main {
         L = scanner.nextInt();
 
         System.out.println("");
-        System.out.println("Starting simulation...");
+
+        SimulationInterface simulation = null;
+
+        if (P == 0.0) {
+            simulation = new Simulation();
+            System.out.println("Starting non-persistent simulation...");
+        } else if (P == 1.0) {
+            simulation = new Simulation();
+            System.out.println("Starting 1-persistent simulation...");
+        } else {
+            simulation = new SimulationPPersistent();
+            System.out.println("Starting " + P + "-persistent simulation...");
+        }
+
         System.out.println("");
 
-        Simulation simulation = new Simulation();
         simulation.startSimulation(NUM_TICKS, N, A, W, L, P);
         simulation.computePerformance();
     }

@@ -4,6 +4,7 @@ public class NodePPersistent {
     private enum State {
         IDLE,
         SENSING,
+        RANDOMWAIT,
         SLOTWAIT,
         TRANSMITTING,
         JAMMING,
@@ -51,6 +52,9 @@ public class NodePPersistent {
             case SENSING:
                 this.sensing();
                 break;
+            case RANDOMWAIT:
+                this.randomWait();
+                break;
             case SLOTWAIT:
                 this.slotWait();
                 break;
@@ -85,7 +89,8 @@ public class NodePPersistent {
 
     private void sensing() {
         if (!network.getNetworkState().equals(Network.State.IDLE)) {
-            this.resetSenseTime();
+            this.currentState = State.RANDOMWAIT;
+            this.time = ExponentialDistribution.backoffRandom(this.backoffCounter);
 
             return;
         }
@@ -102,6 +107,15 @@ public class NodePPersistent {
             this.currentState = State.SLOTWAIT;
             this.resetSenseTime();
         }
+    }
+
+    private void randomWait() {
+        if (this.time > 0) {
+            return;
+        }
+
+        this.resetSenseTime();
+        this.currentState = State.SENSING;
     }
 
     private void slotWait() {
@@ -168,9 +182,5 @@ public class NodePPersistent {
 
     private void resetSenseTime() {
         this.time = SENSING_TIME;
-
-        if (this.P == 0.0) {
-            this.time += ExponentialDistribution.backoffRandom(this.backoffCounter);
-        }
     }
 }

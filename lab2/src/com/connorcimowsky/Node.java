@@ -4,6 +4,8 @@ public class Node {
     private enum State {
         IDLE,
         SENSING,
+        SLOTWAIT,
+        RANDOMWAIT,
         TRANSMITTING,
         JAMMING,
         BACKOFF
@@ -50,6 +52,9 @@ public class Node {
             case SENSING:
                 this.sensing();
                 break;
+            case RANDOMWAIT:
+                this.randomWait();
+                break;
             case TRANSMITTING:
                 this.transmitting();
                 break;
@@ -81,7 +86,10 @@ public class Node {
 
     private void sensing() {
         if (!network.getNetworkState().equals(Network.State.IDLE)) {
-            this.resetSenseTime();
+            if (this.P == 0.0) {
+                this.time = ExponentialDistribution.backoffRandom(this.backoffCounter);
+                this.currentState = State.RANDOMWAIT;
+            }
 
             return;
         }
@@ -93,6 +101,15 @@ public class Node {
         this.currentState = State.TRANSMITTING;
         this.network.addTraffic();
         this.time = this.propagationDelay + this.packetLength;
+    }
+
+    private void randomWait() {
+        if (this.time > 0) {
+            return;
+        }
+
+        this.resetSenseTime();
+        this.currentState = State.SENSING;
     }
 
     private void transmitting() {
@@ -136,9 +153,5 @@ public class Node {
 
     private void resetSenseTime() {
         this.time = SENSING_TIME;
-
-        if (this.P == 0.0) {
-            this.time += ExponentialDistribution.backoffRandom(this.backoffCounter);
-        }
     }
 }

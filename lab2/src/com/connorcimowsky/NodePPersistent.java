@@ -1,9 +1,11 @@
 package com.connorcimowsky;
 
-public class Node {
+public class NodePPersistent {
     private enum State {
         IDLE,
         SENSING,
+        RANDOMWAIT,
+        SLOTWAIT,
         TRANSMITTING,
         JAMMING,
         BACKOFF
@@ -20,10 +22,10 @@ public class Node {
     private int packetLength;
     private int backoffCounter;
     private long completedRequests;
-    private int delayTime;
+    private long delayTime;
     private double P;
 
-    public Node(long propagationDelay, Network network, long lambda, int packetLength, double P) {
+    public NodePPersistent(long propagationDelay, Network network, long lambda, int packetLength, double P) {
         this.propagationDelay = propagationDelay;
         this.time = ExponentialDistribution.randomVariable(lambda);
         this.currentState = State.IDLE;
@@ -50,6 +52,12 @@ public class Node {
             case SENSING:
                 this.sensing();
                 break;
+            case RANDOMWAIT:
+                this.randomWait();
+                break;
+            case SLOTWAIT:
+                this.slotWait();
+                break;
             case TRANSMITTING:
                 this.transmitting();
                 break;
@@ -66,7 +74,7 @@ public class Node {
         return this.completedRequests;
     }
 
-    public int getDelayTime() {
+    public long getDelayTime() {
         return this.delayTime;
     }
 
@@ -81,8 +89,8 @@ public class Node {
 
     private void sensing() {
         if (!network.getNetworkState().equals(Network.State.IDLE)) {
-            this.resetSenseTime();
-
+            this.currentState = State.RANDOMWAIT;
+            this.time = ExponentialDistribution.backoffRandom(this.backoffCounter);
             return;
         }
 
@@ -90,9 +98,55 @@ public class Node {
             return;
         }
 
-        this.currentState = State.TRANSMITTING;
-        this.network.addTraffic();
-        this.time = this.propagationDelay + this.packetLength;
+        if (Math.random() <= this.P) {
+            this.currentState = State.TRANSMITTING;
+            this.network.addTraffic();
+            this.time = this.propagationDelay + this.packetLength;
+        } else {
+            this.currentState = State.SLOTWAIT;
+            this.resetSenseTime();
+        }
+    }
+
+    private void randomWait() {
+        if (this.time > 0) {
+            return;
+        }
+        this.currentState = State.SENSING;
+        this.resetSenseTime();
+    }
+
+    private void slotWait() {
+        // if (!network.getNetworkState().equals(Network.State.IDLE)) {
+        //     collision();
+        //     return;
+        // }
+        //
+        // if (this.time > 0) {
+        //     return;
+        // }
+        //
+        // if (Math.random() <= this.P) {
+        //     this.currentState = State.TRANSMITTING;
+        //     this.network.addTraffic();
+        //     this.time = this.propagationDelay + this.packetLength;
+        // } else {
+        //     this.resetSenseTime();
+        // }
+//=============================================================================
+        if (this.time > 0) {
+            return;
+        }
+
+        // TODO confirm we only want to check once and not poll
+        if (!network.getNetworkState().equals(Network.State.IDLE)) {
+            // TODO new/old/incr backoff counter? does it go back to sensing?
+            // assume i doesnt reset and we go straight to backoff state -> sensing
+            this.currentState = State.BACKOFF;
+            this.time = ExponentialDistribution.backoffRandom(this.backoffCounter);
+        } else {
+            this.sensing();
+        }
     }
 
     private void transmitting() {
@@ -112,11 +166,7 @@ public class Node {
         }
     }
 
-    private void jamming() {
-        if (this.time > 0) {
-            return;
-        }
-
+    private void collision() {
         this.currentState = State.BACKOFF;
         this.network.removeTraffic();
 
@@ -125,6 +175,14 @@ public class Node {
         }
 
         this.time = ExponentialDistribution.backoffRandom(this.backoffCounter);
+    }
+
+    private void jamming() {
+        if (this.time > 0) {
+            return;
+        }
+
+        this.collision();
     }
 
     private void backoff() {

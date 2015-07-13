@@ -156,7 +156,6 @@ public class NodePPersistent {
 
     private void collision() {
         this.currentState = State.BACKOFF;
-        this.network.removeTraffic();
 
         if (this.backoffCounter < 10) {
             this.backoffCounter += 1;
@@ -170,6 +169,7 @@ public class NodePPersistent {
             return;
         }
 
+        this.network.removeTraffic();
         this.collision();
     }
 

@@ -11,9 +11,9 @@ public class Main {
     public static void main(String[] args) {
         final Scanner scanner = new Scanner(System.in);
 
-        System.out.print("1-persistent? [y/n] ");
+        System.out.print("Level of persistence: ");
 
-        boolean onePersistent = (scanner.nextLine().equals("y"));
+        double P = scanner.nextDouble();
 
         System.out.println("");
 
@@ -35,40 +35,23 @@ public class Main {
         L = scanner.nextInt();
 
         System.out.println("");
-        System.out.println("Starting simulation...");
+
+        SimulationInterface simulation = null;
+
+        if (P == 0.0) {
+            simulation = new Simulation();
+            System.out.println("Starting non-persistent simulation...");
+        } else if (P == 1.0) {
+            simulation = new Simulation();
+            System.out.println("Starting 1-persistent simulation...");
+        } else {
+            simulation = new SimulationPPersistent();
+            System.out.println("Starting " + P + "-persistent simulation...");
+        }
+
         System.out.println("");
 
-        if (onePersistent) {
-            Simulation simulation = new Simulation();
-            simulation.startSimulation(NUM_TICKS, N, A, W, L);
-            simulation.computePerformance();
-        }
-
-    }
-
-    private static void questionOneAndThree(Simulation s) {
-        for (int A = 5; A <= 7; A++) {
-            System.out.println("Running for A = " + A);
-            System.out.println();
-            for (int n = 20; n <= 100; n+= 20) {
-                System.out.println("Running for n = " + n);
-                System.out.println();
-                s.startSimulation(NUM_TICKS, n, A, NETWORK_SPEED, PACKET_LENGTH);
-                s.computePerformance();
-            }
-        }
-    }
-
-    private static void questionTwoAndFour(Simulation s) {
-        for (int n = 20; n <= 40; n += 10) {
-            System.out.println("Running for n = " + n);
-            System.out.println();
-            for (int A = 4; A <= 20; A += 4) {
-                System.out.println("Running for A = " + A);
-                System.out.println();
-                s.startSimulation(NUM_TICKS, n, A, NETWORK_SPEED, PACKET_LENGTH);
-                s.computePerformance();
-            }
-        }
+        simulation.startSimulation(NUM_TICKS, N, A, W, L, P);
+        simulation.computePerformance();
     }
 }

@@ -4,6 +4,7 @@ public class NodePPersistent {
     private enum State {
         IDLE,
         SENSING,
+        RANDOMWAIT,
         SLOTWAIT,
         TRANSMITTING,
         JAMMING,
@@ -51,6 +52,9 @@ public class NodePPersistent {
             case SENSING:
                 this.sensing();
                 break;
+            case RANDOMWAIT:
+                this.randomWait();
+                break;
             case SLOTWAIT:
                 this.slotWait();
                 break;
@@ -85,8 +89,8 @@ public class NodePPersistent {
 
     private void sensing() {
         if (!network.getNetworkState().equals(Network.State.IDLE)) {
-            this.resetSenseTime();
-
+            this.currentState = State.RANDOMWAIT;
+            this.time = ExponentialDistribution.backoffRandom(this.backoffCounter);
             return;
         }
 
@@ -104,22 +108,44 @@ public class NodePPersistent {
         }
     }
 
+    private void randomWait() {
+        if (this.time > 0) {
+            return;
+        }
+        this.currentState = State.SENSING;
+        this.resetSenseTime();
+    }
+
     private void slotWait() {
+        // if (!network.getNetworkState().equals(Network.State.IDLE)) {
+        //     collision();
+        //     return;
+        // }
+        //
+        // if (this.time > 0) {
+        //     return;
+        // }
+        //
+        // if (Math.random() <= this.P) {
+        //     this.currentState = State.TRANSMITTING;
+        //     this.network.addTraffic();
+        //     this.time = this.propagationDelay + this.packetLength;
+        // } else {
+        //     this.resetSenseTime();
+        // }
+//=============================================================================
+        if (this.time > 0) {
+            return;
+        }
+
+        // TODO confirm we only want to check once and not poll
         if (!network.getNetworkState().equals(Network.State.IDLE)) {
-            collision();
-            return;
-        }
-
-        if (this.time != 0) {
-            return;
-        }
-
-        if (Math.random() <= this.P) {
-            this.currentState = State.TRANSMITTING;
-            this.network.addTraffic();
-            this.time = this.propagationDelay + this.packetLength;
+            // TODO new/old/incr backoff counter? does it go back to sensing?
+            // assume i doesnt reset and we go straight to backoff state -> sensing
+            this.currentState = State.BACKOFF;
+            this.time = ExponentialDistribution.backoffRandom(this.backoffCounter);
         } else {
-            this.resetSenseTime();
+            this.sensing();
         }
     }
 
@@ -168,9 +194,5 @@ public class NodePPersistent {
 
     private void resetSenseTime() {
         this.time = SENSING_TIME;
-
-        if (this.P == 0.0) {
-            this.time += ExponentialDistribution.backoffRandom(this.backoffCounter);
-        }
     }
 }

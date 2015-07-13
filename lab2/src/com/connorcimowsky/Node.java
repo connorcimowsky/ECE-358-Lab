@@ -136,9 +136,5 @@ public class Node {
 
     private void resetSenseTime() {
         this.time = SENSING_TIME;
-
-        if (this.P == 0.0) {
-            this.time += ExponentialDistribution.backoffRandom(this.backoffCounter);
-        }
     }
 }

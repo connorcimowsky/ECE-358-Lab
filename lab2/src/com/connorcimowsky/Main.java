@@ -11,16 +11,18 @@ public class Main {
     public static void main(String[] args) {
         final Scanner scanner = new Scanner(System.in);
 
-        System.out.print("Level of persistence: ");
-
-        double P = scanner.nextDouble();
-
-        System.out.println("");
-
         long W = 0;
         int L = 0;
         int N = 0;
         long A = 0;
+        double P = 100.0;
+
+        System.out.println("1-persistent? [y/n] ");
+        boolean onePersistent = (scanner.nextLine().equals("y"));
+        if (!onePersistent){
+            System.out.println("Level of persistence: ");
+            P = scanner.nextDouble();
+        }
 
         System.out.println("Enter a value for N: ");
         N = scanner.nextInt();
@@ -38,10 +40,7 @@ public class Main {
 
         SimulationInterface simulation = null;
 
-        if (P == 0.0) {
-            simulation = new Simulation();
-            System.out.println("Starting non-persistent simulation...");
-        } else if (P == 1.0) {
+        if (onePersistent) {
             simulation = new Simulation();
             System.out.println("Starting 1-persistent simulation...");
         } else {
